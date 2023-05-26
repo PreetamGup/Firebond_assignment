@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+
+</head>
+
+<body>
+    <div id="mainBox">
+        <div>
+            <div id="arguments">
+                <div class="inputsArg">
+                    <input type="text" value="My Arg" onchange="handleKeyValue()"></input>
+                    <select name="choice" class="ArgValue" onchange="handleKeyValue()">
+                        <option value="false">false</option>
+                        <option value="true">true</option>
+                    </select>
+                </div>
+            </div>
+            <button id="addArg" onclick="handleAdd()">+ add arg</button>
+        </div>
+        <br>
+
+        <div id="mainContainer">
+            <div class="operationContainer" id="container1">
+                <select name="ope" id="operation1" onchange="handleOperation('operation1')">
+                    <option selected diabled>Select...</option>
+                    <option value="constant">constant</option>
+                    <option value="Argument">Argument </option>
+                    <option value="and">and</option>
+                    <option value="or">or</option>
+                </select>
+                <button onclick="originalValue('operation1')">x</button>
+            </div>
+        </div>
+    </div>
+
+    <p id="result"> result:
+    <p>
+
+</body>
+
+<footer>
+    <script>
+        const addBtn = document.getElementById("addArg");
+        const divContainer = document.getElementById("arguments");
+        const mainContainer = document.getElementById("mainContainer");
+        const divInput = document.querySelector(".inputsArg").innerHTML;
+        const selectInput = document.querySelector(".operationContainer");
+
+        let left = 0;
+        let count = 1;
+        let argumentObject = { "My Arg": false };
+        const constant = [false, true]
+
+        const handleAdd = () => {
+            const div = document.createElement("div")
+            div.className = 'inputsArg'
+
+            let input = document.createElement('input');
+            input.type = 'text';
+            input.value = 'My Arg'
+            input.onchange = handleKeyValue; // Trigger calculation on change
+
+            div.appendChild(input);
+
+            // Create a new select box
+            let select = document.createElement('select');
+            let option1 = document.createElement('option');
+            option1.value = 'false';
+            option1.text = 'false';
+            let option2 = document.createElement('option');
+            option2.value = 'true';
+            option2.text = 'true';
+            select.add(option1);
+            select.add(option2);
+            select.className = "ArgValue";
+            select.onchange = handleKeyValue; // Trigger calculation on change
+            div.appendChild(select);
+
+            divContainer.appendChild(div);
+        }
+
+        const handleKeyValue = () => {
+            var inputs = document.querySelectorAll('input[type="text"]');
+            var selects = document.querySelectorAll('.ArgValue');
+
+            var keyValuePairs = {};
+
+            for (var i = 0; i < inputs.length; i++) {
+                var key = inputs[i].value;
+                var value = selects[i].value;
+
+                // Store the key-value pair in the object
+                keyValuePairs[key] = value;
+            }
+
+            //adding to argument object
+            argumentObject = keyValuePairs;
+
+        }
+
+
+        const handleOperation = (operation) => {
+            let selectBox = document.getElementById(operation)
+            let selectedValue = selectBox.value;
+            console.log(selectedValue)
+
+
+            if (selectedValue == "and" || selectedValue == "or") {
+
+                selectBox.innerHTML = `<option value=${selectedValue == "and" ? "and" : "or"}>${selectedValue == "and" ? "and" : "or"}</option><option value=${selectedValue == "and" ? "or" : "and"}>${selectedValue == "and" ? "or" : "and"}</option>`;
+
+                selectBox.classList = "andOr";
+                console.log(selectBox)
+                //removing neccessary input box
+                selectBox.onchange = null;
+
+                left = left + 5;
+
+                for (let i = 1; i <= 2; i++) {
+                    count++;
+                    const operationId = `operation${count}`
+                    const div = document.createElement("div")
+                    div.className = 'operationContainer';
+                    div.setAttribute("id", `container${left + i}`)
+                    // console.log(operation.value, selectedValue)
+
+                    let select = document.createElement('select');
+                    select.innerHTML = '<option selected diabled>Select...</option><option value="constant">constant</option><option value="Argument">Argument </option><option value="and">and</option><option value="or">or</option>  '
+                    select.id = operationId;
+
+                    select.addEventListener("change", () => handleOperation(operationId))
+                    let btn = document.createElement('button');
+                    btn.innerText = "x"
+                    btn.addEventListener("click", () => originalValue(operationId))
+                    div.appendChild(select)
+                    div.appendChild(btn)
+
+                    div.style.marginLeft = `${left}px`
+                    mainContainer.appendChild(div);
+                }
+
+                let btnAddop = document.createElement('button');
+                btnAddop.innerText = '+add op';
+                btnAddop.addEventListener("click", addOperation)
+
+                const main = document.getElementById('mainBox')
+                main.appendChild(btnAddop)
+
+            } else if (selectedValue === 'constant') {
+                selectBox.innerHTML = '<option value="true">true</option><option value="false">false</option>';
+                selectBox.classList = "result"
+            }
+            else if (selectedValue === 'Argument') {
+                selectBox.innerHTML = '';
+
+                for (var key in argumentObject) {
+                    var option = document.createElement('option');
+                    option.value = argumentObject[key];
+                    option.text = key;
+                    selectBox.add(option);
+                }
+                selectBox.classList = "result";
+            }
+
+            findingResult();
+        }
+
+        function addOperation() {
+            count++;
+            const operationId = `operation${count}`
+            const div = document.createElement("div")
+            div.className = 'operationContainer';
+            // div.setAttribute("id",`container${left+i}`)
+            // console.log(operation.value, selectInput)
+
+            let select = document.createElement('select');
+            select.innerHTML = '<option selected diabled>Select...</option><option value="constant">constant</option><option value="Argument">Argument </option><option value="and">and</option><option value="or">or</option>  '
+            select.id = operationId;
+
+            select.addEventListener("change", () => handleOperation(operationId))
+            let btn = document.createElement('button');
+            btn.innerText = "x"
+            btn.addEventListener("click", () => originalValue(operationId))
+            div.appendChild(select)
+            div.appendChild(btn)
+
+            div.style.marginLeft = `${left}px`
+            mainContainer.appendChild(div);
+
+        }
+
+
+        function originalValue(selectId) {
+            let select = document.getElementById(selectId);
+            select.innerHTML = '<option selected diabled>Select...</option><option value="constant">constant</option><option value="Argument">Argument </option><option value="and">and</option><option value="or">or</option> '
+        }
+
+
+        function findingResult() {
+            const isAndOr = document.querySelectorAll('.andOr');
+            const resultArr = document.querySelectorAll('.result');
+            let paraResult = document.getElementById("result");
+
+            if (isAndOr.length === 0) {
+                paraResult.innerText = `result: ${resultArr[0].value}`
+            } else {
+
+                for (let i = 0; i < resultArr.length;) {
+                    for (let j = 0; j < isAndOr.length; j++) {
+                        // console.log(resultArr[i].value, resultArr[i+1].value)
+                        if (isAndOr[j].value == "and") {
+                            let result = resultArr[i].value && resultArr[i + 1].value
+                            paraResult.innerText = `result: ${result}`
+
+                            // console.log(isAndOr[j].value,resultArr[i].value, resultArr[i+1].value)
+                        } else {
+                            result = resultArr[i].value || resultArr[i + 1].value
+                            paraResult.innerText = `result: ${result}`
+
+                            // console.log(isAndOr[j].value,resultArr[i].value, resultArr[i+1].value)
+                        }
+                        i += 2
+                    }
+                }
+
+
+            }
+
+        }
+
+
+    </script>
+</footer>
+
+</html>
